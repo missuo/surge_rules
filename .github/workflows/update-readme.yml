@@ -1,0 +1,67 @@
+name: Update README
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'rule/**'
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate README with rule links
+        run: |
+          REPO="${{ github.repository }}"
+          BRANCH="main"
+
+          cat > README.md << 'HEADER'
+          # Surge Rules
+
+          本仓库的规则仅适用于 [Surge](https://nssurge.com/)。
+
+          ## Rules
+
+          | 规则名称 | Raw 链接 |
+          | --- | --- |
+          HEADER
+
+          for file in rule/*.list; do
+            if [ -f "$file" ]; then
+              filename=$(basename "$file")
+              name="${filename%.list}"
+              raw_url="https://raw.githubusercontent.com/${REPO}/${BRANCH}/${file}"
+              echo "| ${name} | [${filename}](${raw_url}) |" >> README.md
+            fi
+          done
+
+          cat >> README.md << 'FOOTER'
+
+          ## Usage
+
+          在 Surge 配置文件中添加规则：
+
+          ```ini
+          [Rule]
+          RULE-SET,https://raw.githubusercontent.com/your-repo/main/rule/AI.list,PROXY
+          ```
+
+          ## License
+
+          MIT
+          FOOTER
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --staged --quiet || git commit -m "docs(readme): update rule links"
+          git push
