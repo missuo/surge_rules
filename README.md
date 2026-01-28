@@ -18,7 +18,7 @@
 
 ```ini
 [Rule]
-RULE-SET,https://raw.githubusercontent.com/missuo/surge_rules/main/rule/AI.list,PROXY
+RULE-SET,https://raw.githubusercontent.com/your-repo/main/rule/AI.list,PROXY
 ```
 
 ## License
